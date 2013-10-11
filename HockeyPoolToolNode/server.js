@@ -1,16 +1,7 @@
-﻿//var express = require('express');
-//var app = express();
-
-//app.get('/', function (req, res) {
-//    res.send('hello world');
-//});
-
-//app.listen(3000);
-
-
-var express = require('express');
+﻿var express = require('express');
 var fs = require('fs');
 var dataFile = "C:\\Webpages\\nhldata.json";
+var saveFile = "HockeyPoolTool.json";
 
 var app = express();
 app.configure = function () {
@@ -29,8 +20,31 @@ app.get("/players", function (request, response) {
                 Team: data[i].Team
             };
         }
-        response.json(data);
+        response.json(data.sort(function (a, b) {
+            if (a.Name > b.Name) {
+                return 1;
+            }
+            if(a.Name < b.Name) {
+                return -1;
+            }
+            return 0;
+        }));
     });
+});
+
+app.post("/players", function (request, response) {
+    fs.writeFile(saveFile, request.body, function (err) {
+        console.log(request.body);
+        if (err) {
+            console.log(err);
+        } else {
+            response.send("Team data saved.");
+        }
+    });
+});
+
+app.get('/knockout-2.3.0.js', function (req, res) {
+    res.sendfile('knockout-2.3.0.js');
 });
 
 function getData(callback) {

@@ -2,15 +2,151 @@
 <html>
     <head>
         <title>Hockey Pool Tool</title>
+        <link rel="stylesheet" type="text/css" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" />
+        <style type="text/css">
+
+        </style>
     </head>
     <body>
-        <script type="text/javascript" src="knockout-2.3.0.js"></script>
+        <div class="container" data-bind="template: 'side-template'"></div>
+
+        <script type="text/html" id="side-template">
+            <h2>Hockey Pool Tool</h2>
+            <div class="row">
+                <div class="col-md-3">
+                    <h3>Players</h3>
+                    <select class="form-control" data-bind="options: allTeams, value: selectedTeam, optionsText: 'name'"></select>
+                    <ul class="list-unstyled players-list" data-bind="foreach: allPlayers">
+                        <li class="player" data-bind="visible: Team == $root.selectedTeam().code, text: Name" style="cursor:move; font-size: 22px; padding:5px 15px;"></li>
+                    </ul>
+                </div>
+                <div class="col-md-9">
+                    <h3>My Team</h3>
+                    <ul class="my-team list-inline well" data-bind="foreach: players">
+                        <li class="my-team-player col-md-4" data-bind="text: Name" style="font-size: 28px; cursor: move;"></li>
+                    </ul>
+                </div>
+            </div>
+        </script>
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+        <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+        <script src="/knockout-2.3.0.js"></script>
+        <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
         <script type="text/javascript">
             var ViewModel = function () {
+                var me = this;
 
+                me.allPlayers = ko.observableArray();
+                me.allTeams = ko.observableArray([
+                    { code: "ANA", name: "Anaheim Ducks" },
+                    { code: "BOS", name: "Boston Bruins" },
+                    { code: "BUF", name: "Buffalo Sabres" },
+                    { code: "CGY", name: "Calgary Flames" },
+                    { code: "CAR", name: "Carolina Hurricanes" },
+                    { code: "CHI", name: "Chicago Blackhawks" },
+                    { code: "COL", name: "Colorado Avalanche" },
+                    { code: "CBJ", name: "Columbus Blue Jackets" },
+                    { code: "DAL", name: "Dallas Stars" },
+                    { code: "DET", name: "Detroit Red Wings" },
+                    { code: "EDM", name: "Edmonton Oilers" },
+                    { code: "FLA", name: "Florida Panthers" },
+                    { code: "LAK", name: "Los Angeles Kings" },
+                    { code: "MIN", name: "Minnesota Wild" },
+                    { code: "MTL", name: "Montréal Canadiens" },
+                    { code: "NSH", name: "Nashville Predators" },
+                    { code: "NJD", name: "New Jersey Devils" },
+                    { code: "NYI", name: "New York Islanders" },
+                    { code: "NYR", name: "New York Rangers" },
+                    { code: "OTT", name: "Ottawa Senators" },
+                    { code: "PHI", name: "Philadelphia Flyers" },
+                    { code: "PHX", name: "Phoenix Coyotes" },
+                    { code: "PIT", name: "Pittsburgh Penguins" },
+                    { code: "SJS", name: "San Jose Sharks" },
+                    { code: "STL", name: "St. Louis Blues" },
+                    { code: "TBL", name: "Tampa Bay Lightning" },
+                    { code: "TOR", name: "Toronto Maple Leafs" },
+                    { code: "VAN", name: "Vancouver Canucks" },
+                    { code: "WSH", name: "Washington Capitals" },
+                    { code: "WPG", name: "Winnipeg Jets" }
+                ]);
+                me.allPlayers.subscribe(function (newValue) {
+                    me.resizeMyTeamPanel();
+                });
+
+                me.resizeMyTeamPanel = function () {
+                    $(".my-team").height($(".players-list").height());
+                };
+
+                me.selectedTeam = ko.observable(me.allTeams()[0]);
+                me.selectedPlayer = ko.observable("");
+                me.players = ko.observableArray();
+                me.players.subscribe(function (newValue) {
+                    $.post("/players", ko.toJSON(me.players), function (response) {
+                        console.log(response);
+                    });
+                });
+
+                me.init = function () {
+                    $.ajaxSetup({
+                        contentType: 'application/json'
+                    });
+                    $.getJSON("/players", function (players) {
+                        me.allPlayers(players);
+                        me.resizeMyTeamPanel();
+
+                        $(".player, .my-team-player").draggable({ revert: true });
+                        $(".my-team").droppable({
+                            accept: ".player",
+                            tolerance: "pointer",
+                            drop: function (event, ui) {
+                                var player = ko.dataFor(ui.draggable[0]);
+                                me.allPlayers.remove(player);
+                                me.players.push(player);
+                                $(".my-team-player").draggable({ revert: true });
+                            }
+                        });
+                        $("body").droppable({
+                            accept: ".my-team-player",
+                            tolerance: "pointer",
+                            drop: function (event, ui) {
+                                var player = ko.dataFor(ui.draggable[0]);
+                                me.allPlayers.push(player);
+                                me.players.remove(player);
+                                $(".player").draggable({ revert: true });
+                            }
+                        });
+                    });
+
+                };
+
+                me.init();
+
+                me.selectedTeam.subscribe(function(newValue){
+                    console.log("selectedTeam: " + ko.toJSON(newValue, null, 2));
+                });
             };
 
-            ko.applyBindings(new viewModel);
+            ko.applyBindings(new ViewModel());
         </script>
+
+        <!--<script type="text/html" id="top-down-template">
+            <h1>Hockey Pool Tool</h1>
+            <div class="row">
+                <div class="col-md-4">
+                    <select class="form-control" data-bind="options: allTeams, value: selectedTeam, optionsText: 'name'"></select>
+                </div>
+            </div>
+            <div class="row">
+                <ul class="players-list list-inline" data-bind="foreach: allPlayers">
+                    <li class="player col-md-3" data-bind="visible: Team == $root.selectedTeam().code, text: Name" style="cursor:move; font-size: 22px; padding:5px 15px;"></li>
+                </ul>
+            </div>
+            <div class="row">
+                <h1>My Team</h1>
+                <ul class="my-team list-inline" data-bind="foreach: players" style="height: 500px; width: 100%; border: 1px solid #999;">
+                    <li class="my-team-player col-md-4" data-bind="text: Name" style="font-size: 28px;"></li>
+                </ul>
+            </div>
+        </script>-->
     </body>
 </html>
