@@ -4,9 +4,7 @@ var dataFile = "C:\\Webpages\\nhldata.json";
 var saveFile = "HockeyPoolTool.json";
 
 var app = express();
-app.configure = function () {
-    app.use(express.bodyParser());
-};
+app.use(express.bodyParser());
 
 app.get('/', function (req, res) {
     res.sendfile('HockeyPoolTool.html');
@@ -14,13 +12,14 @@ app.get('/', function (req, res) {
 
 app.get("/players", function (request, response) {
     getData(function (data) {
-        for (var i in data) {
-            data[i] = {
-                Name: data[i].Name,
-                Team: data[i].Team
+        var players = data.Data;
+        for (var i in players) {
+            players[i] = {
+                Name: players[i].Name,
+                Team: players[i].Team
             };
         }
-        response.json(data.sort(function (a, b) {
+        response.json(players.sort(function (a, b) {
             if (a.Name > b.Name) {
                 return 1;
             }
@@ -32,14 +31,26 @@ app.get("/players", function (request, response) {
     });
 });
 
-app.post("/players", function (request, response) {
-    fs.writeFile(saveFile, request.body, function (err) {
-        console.log(request.body);
+app.get("/myteam", function(request, response){
+    getTeam(function (team) {
+        response.json(team);
+    });
+});
+
+app.post("/myteam", function (request, response) {
+    debugger;
+    fs.writeFile(saveFile, JSON.stringify(request.body, null, 2), function (err) {
         if (err) {
             console.log(err);
         } else {
             response.send("Team data saved.");
         }
+    });
+});
+
+app.get("/teams", function (request, response) {
+    getData(function (data) {
+        response.json(data.Teams);
     });
 });
 
@@ -49,6 +60,12 @@ app.get('/knockout-2.3.0.js', function (req, res) {
 
 function getData(callback) {
     fs.readFile(dataFile, 'utf8', function(err, data){
+        callback(JSON.parse(data));
+    });
+}
+
+function getTeam(callback) {
+    fs.readFile(saveFile, 'utf8', function (err, data) {
         callback(JSON.parse(data));
     });
 }
