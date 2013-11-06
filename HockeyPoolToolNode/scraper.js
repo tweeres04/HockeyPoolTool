@@ -16,8 +16,6 @@ request(url, function(err, resp, body){
 			var column = $($(".data thead th")[j]).text().replace(/\n/g, "");
 			var value = $(cell).text().replace(/\n/g, "");
 
-			debugger;
-
 			// Handle first column
 			if(column == " "){
 				column = "Rank";
