@@ -23,9 +23,10 @@ request(url, function(err, resp, body){
 				column = "Rank";
 			}
 
-			player[] = value;
+			player[column] = value;
 			console.log(column + ": " + value);
 		});
+		data.push(player);
 	});
 	
 	fs.writeFile("scrapedata.json", JSON.stringify(data, null, 2), function(err) {
