@@ -1,6 +1,7 @@
 ﻿var express = require('express');
 var fs = require('fs');
-var dataFile = "C:\\Webpages\\nhldata.json";
+var dataFile = "scrapedata.json";
+var teamsFile = "teams.json";
 var saveFile = "HockeyPoolTool.json";
 
 var app = express();
@@ -12,22 +13,26 @@ app.get('/', function (req, res) {
 
 app.get("/players", function (request, response) {
     getData(function (data) {
-        var players = data.Data;
+        var players = data.Stats;
         for (var i in players) {
             players[i] = {
-                Name: players[i].Name,
+                Name: players[i].Player,
                 Team: players[i].Team
             };
         }
-        response.json(players.sort(function (a, b) {
-            if (a.Name > b.Name) {
-                return 1;
-            }
-            if(a.Name < b.Name) {
-                return -1;
-            }
-            return 0;
-        }));
+        if(players) {
+		    response.json(players.sort(function (a, b) {
+		        if (a.Name > b.Name) {
+		            return 1;
+		        }
+		        if(a.Name < b.Name) {
+		            return -1;
+		        }
+		        return 0;
+		    }));
+	    } else {
+	    	response.json([]);
+    	}
     });
 });
 
@@ -38,7 +43,6 @@ app.get("/myteam", function(request, response){
 });
 
 app.post("/myteam", function (request, response) {
-    debugger;
     fs.writeFile(saveFile, JSON.stringify(request.body, null, 2), function (err) {
         if (err) {
             console.log(err);
@@ -60,7 +64,12 @@ app.get('/knockout-2.3.0.js', function (req, res) {
 
 function getData(callback) {
     fs.readFile(dataFile, 'utf8', function(err, data){
-        callback(JSON.parse(data));
+	    var nhlData = {};
+    	nhlData.Stats = JSON.parse(data);
+	    fs.readFile(teamsFile, 'utf8', function(err, data){
+	    	nhlData.Teams = JSON.parse(data);
+	        callback(nhlData);
+		});
     });
 }
 
