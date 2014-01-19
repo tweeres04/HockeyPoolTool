@@ -13,7 +13,18 @@ var ViewModel = function () {
     me.currentView.subscribe(function(newView){
         me.currentViewModel = new newView.viewModel({ parent: me });
     });
+
+    $(document).ajaxError(function(event, request, settings) {
+        showErrorMessage("danger", 'Error requesting <span class="alert-link">' + settings.url + "</span>");
+    });
 };
+
+function showErrorMessage(type, message){
+    var alert = $("<div>").addClass("alert alert-" + type);
+    alert.append('<button type="button" class="close" data-dismiss="alert">&times;</button>');
+    alert.append($("<p>").html(message));
+    $(".container").prepend(alert);
+}
 
 function StatsViewModel(options){
     var me = this;
