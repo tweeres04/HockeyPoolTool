@@ -9,28 +9,42 @@
     </head>
     <body>
         <div class="container" >
+            <div class="page-header">
+                <h1>Hockey Pool Tool</h1>
+            </div>
             <ul class="nav nav-tabs" data-bind="foreach: views">
                 <li data-bind="css: { active: $parent.currentView().name == name }"><a data-bind="attr: { href: '/#/' + name }, text: label, click: function(data) { $parent.currentView(data) }"></a></li>
             </ul>
-            <div data-bind="template: { name: currentView().name + '-template', data: currentViewModel, if: currentViewModel }"></div>
+            <div data-bind="template: { name: currentView().name + '-template', data: currentViewModel, if: currentViewModel, afterRender: afterRender }"></div>
         </div>
 
         <script type="text/html" id="stats-template">
             <h2>Stats</h2>
-            <table class="table table-striped table-hover table-responsive">
-                <thead data-bind="foreach: headers">
-                    <th data-bind="text: $data"></th>
-                </thead>
-                <tbody data-bind="foreach: $parent.myTeam">
-                    <tr data-bind="foreach: $parent.headers">
-                        <td data-bind="$parent[$data]"></td>
-                    </tr>
-                </tbody>
-            </table>
+            <div class="row">
+                <div class="col-md-12">
+                    <!-- ko if: $parent.myTeam().length > 0 -->
+                    <table class="table table-striped table-hover table-responsive">
+                        <thead>
+                            <tr data-bind="foreach: headers"> 
+                                <th data-bind="text: $data"></th>
+                            </tr>
+                        </thead>
+                        <tbody data-bind="foreach: $parent.myTeam">
+                            <tr data-bind="foreach: $parent.headers">
+                                <td data-bind="text: $parent[$data]"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <!-- /ko -->
+                    <!-- ko if: $parent.myTeam().length == 0 -->
+                    <p style="font-size: 18px;">Your team is empty!</p>
+                    <!-- /ko -->
+                </div>
+            </div>
         </script>
 
         <script type="text/html" id="my-team-template">
-            <h2>Hockey Pool Tool</h2>
+            <h2>My Team</h2>
             <div class="row">
                 <div class="col-md-3">
                     <h3>Players</h3>

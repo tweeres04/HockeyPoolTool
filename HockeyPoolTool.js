@@ -1,4 +1,6 @@
-function showErrorMessage(type, message){
+(function(){
+
+function showMessage(type, message){
     var alert = $("<div>").addClass("alert alert-" + type);
     alert.append('<button type="button" class="close" data-dismiss="alert">&times;</button>');
     alert.append($("<p>").html(message));
@@ -7,6 +9,7 @@ function showErrorMessage(type, message){
 
 function HockeyPoolToolViewModel(options) {
     var me = this;
+    options = options || {};
 
     me.views = [ { name: "my-team", viewModel: MyTeamViewModel, label: "My Team" }, { name: "stats", viewModel: StatsViewModel, label: "Stats" } ];
     me.currentView = ko.observable(me.views[0]);
@@ -18,24 +21,29 @@ function HockeyPoolToolViewModel(options) {
     me.currentViewModel = ko.observable();
 
     me.currentView.subscribe(function(newView){
-        me.currentViewModel = new newView.viewModel({ parent: me });
+        me.currentViewModel(newView.viewModel);
     });
 
     $.ajaxSetup({ contentType: "application/json" });
 
     $(document).ajaxError(function(event, request, settings) {
-        showErrorMessage("danger", 'Error requesting <span class="alert-link">' + settings.url + "</span>");
+        showMessage("danger", 'Error requesting <span class="alert-link">' + settings.url + "</span>");
     });
 
     loadData(function(){
-        me.currentViewModel(new MyTeamViewModel({ parent: me }));
+        for(var i = 0; i < me.views.length; i++){
+            me.views[i].viewModel = new me.views[i].viewModel({ parent: me });
+        }
+        me.currentViewModel(me.views[0].viewModel);
         if(options.callback){
             options.callback();
         }
     });
 
-    me.afterBind = function(){
-        me.currentViewModel().afterBind();
+    me.afterRender = function(){
+        if(me.currentViewModel().afterRender){
+            me.currentViewModel().afterRender();
+        }
     };
 
     function loadData(callback) {
@@ -72,6 +80,7 @@ function HockeyPoolToolViewModel(options) {
 function StatsViewModel(options){
     var me = this;
     me.parent = options.parent;
+    options = options || {};
 
     me.headers = Object.keys(me.parent.allPlayers()[0]);
 }
@@ -79,6 +88,7 @@ function StatsViewModel(options){
 function MyTeamViewModel(options){
     var me = this;
     me.parent = options.parent;
+    options = options || {};
 
     me.selectedTeam = ko.observable();
     me.selectedTeam.subscribe(function (newValue) {
@@ -86,7 +96,7 @@ function MyTeamViewModel(options){
     });
     me.selectedTeam(me.parent.allTeams()[0]);
 
-    me.afterBind = function(){
+    me.afterRender = function(){
         resizeMyTeamPanel();
         setUpDragAndDrop();
     };
@@ -106,6 +116,7 @@ function MyTeamViewModel(options){
                 me.parent.allPlayers.remove(player);
                 me.parent.myTeam.push(player);
                 $(".my-team-player").draggable({ revert: true });
+                event.stopPropagation();
             }
         });
 
@@ -126,7 +137,17 @@ function MyTeamViewModel(options){
     }
 }
 
-var viewModel = new HockeyPoolToolViewModel({ callback: function(){
-    ko.applyBindings(viewModel);
-    viewModel.afterBind();
-}});
+var viewModel = new HockeyPoolToolViewModel();
+ko.applyBindings(viewModel);
+
+// function onHashChange(){
+//     var hashParts = location.hash.split("/");
+
+//     for(var i = 0; i < viewModel.views.length; i++){
+//         if(viewModel.views[i].name == hashParts[1]){
+//             viewModel.currentView(viewModel.views[i]);
+//         }
+//     }
+// }
+
+})();

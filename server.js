@@ -15,12 +15,6 @@ app.get('/', function (req, res) {
 app.get("/players", function (request, response) {
     getData(function (data) {
         var players = data.Stats;
-        // for (var i in players) {
-        //     players[i] = {
-        //         Name: players[i].Player,
-        //         Team: players[i].Team
-        //     };
-        // }
         if(players) {
 		    response.json(players.sort(function (a, b) {
 		        if (a.Player > b.Player) {
@@ -36,17 +30,6 @@ app.get("/players", function (request, response) {
     	}
     });
 });
-
-// app.get("/stats", function(request, response){
-//     getData(function (data) {
-//         var stats = data.Stats;
-//         if(stats) {
-//             response.json(stats);
-//         } else {
-//             response.json([]);
-//         }
-//     });
-// });
 
 app.get("/myteam", function(request, response){
     getTeam(function (team) {
