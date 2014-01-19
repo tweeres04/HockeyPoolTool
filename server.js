@@ -5,6 +5,7 @@ var teamsFile = "teams.json";
 var saveFile = "HockeyPoolTool.json";
 
 var app = express();
+app.use(express.static(__dirname + "/"));
 app.use(express.bodyParser());
 
 app.get('/', function (req, res) {
@@ -56,10 +57,6 @@ app.get("/teams", function (request, response) {
     getData(function (data) {
         response.json(data.Teams);
     });
-});
-
-app.get('/knockout-2.3.0.js', function (req, res) {
-    res.sendfile('knockout-2.3.0.js');
 });
 
 function getData(callback) {
