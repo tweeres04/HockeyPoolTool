@@ -12,7 +12,7 @@
             <ul class="nav nav-tabs" data-bind="foreach: views">
                 <li data-bind="css: { active: $parent.currentView().name == name }"><a data-bind="attr: { href: '/#/' + name }, text: label, click: function(data) { $parent.currentView(data) }"></a></li>
             </ul>
-            <div data-bind="template: { name: currentView().name + '-template', data: currentViewModel, if: currentViewModel() }"></div>
+            <div data-bind="template: { name: currentView().name + '-template', data: currentViewModel, if: currentViewModel }"></div>
         </div>
 
         <script type="text/html" id="stats-template">
@@ -22,7 +22,9 @@
                     <th data-bind="text: $data"></th>
                 </thead>
                 <tbody data-bind="foreach: $parent.myTeam">
-
+                    <tr data-bind="foreach: $parent.headers">
+                        <td data-bind="$parent[$data]"></td>
+                    </tr>
                 </tbody>
             </table>
         </script>
@@ -34,13 +36,13 @@
                     <h3>Players</h3>
                     <select class="form-control" data-bind="options: $parent.allTeams, value: selectedTeam, optionsText: 'name'"></select>
                     <ul class="list-unstyled players-list" data-bind="foreach: $parent.allPlayers">
-                        <li class="player" data-bind="visible: Team == $parent.selectedTeam().code, text: Name" style="cursor:move; font-size: 22px; padding:5px 15px;"></li>
+                        <li class="player" data-bind="visible: Team == $parent.selectedTeam().code, text: Player" style="cursor:move; font-size: 22px; padding:5px 15px;"></li>
                     </ul>
                 </div>
                 <div class="col-md-9">
                     <h3>My Team</h3>
                     <ul class="my-team list-inline well" data-bind="foreach: $parent.myTeam">
-                        <li class="my-team-player col-md-4" data-bind="text: Name" style="font-size: 28px; cursor: move;"></li>
+                        <li class="my-team-player col-md-4" data-bind="text: Player" style="font-size: 28px; cursor: move;"></li>
                     </ul>
                 </div>
             </div>

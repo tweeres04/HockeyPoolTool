@@ -5,7 +5,7 @@ function showErrorMessage(type, message){
     $(".container").prepend(alert);
 }
 
-var HockeyPoolToolViewModel = function () {
+function HockeyPoolToolViewModel(options) {
     var me = this;
 
     me.views = [ { name: "my-team", viewModel: MyTeamViewModel, label: "My Team" }, { name: "stats", viewModel: StatsViewModel, label: "Stats" } ];
@@ -14,6 +14,7 @@ var HockeyPoolToolViewModel = function () {
     me.allPlayers = ko.observableArray();
     me.allTeams = ko.observableArray();
     me.myTeam = ko.observableArray();
+    me.stats = ko.observableArray();
     me.currentViewModel = ko.observable();
 
     me.currentView.subscribe(function(newView){
@@ -28,7 +29,14 @@ var HockeyPoolToolViewModel = function () {
 
     loadData(function(){
         me.currentViewModel(new MyTeamViewModel({ parent: me }));
+        if(options.callback){
+            options.callback();
+        }
     });
+
+    me.afterBind = function(){
+        me.currentViewModel().afterBind();
+    };
 
     function loadData(callback) {
         $.getJSON("/teams", function (teams) {
@@ -46,13 +54,15 @@ var HockeyPoolToolViewModel = function () {
 
                     for (var i in me.myTeam()) {
                         for(var j in me.allPlayers()){
-                            if(me.myTeam()[i].Name == me.allPlayers()[j].Name){
+                            if(me.myTeam()[i].Player == me.allPlayers()[j].Player){
                                 me.allPlayers.remove(me.allPlayers()[j]);
                                 break;
                             }
                         }
                     }
-                    callback();
+                    if(callback){
+                        callback();
+                    }
                 });
             });
         });
@@ -75,7 +85,11 @@ function MyTeamViewModel(options){
         resizeMyTeamPanel();
     });
     me.selectedTeam(me.parent.allTeams()[0]);
-    //me.selectedPlayer = ko.observable("");
+
+    me.afterBind = function(){
+        resizeMyTeamPanel();
+        setUpDragAndDrop();
+    };
 
     function resizeMyTeamPanel() {
         $(".my-team").height($(".players-list").height());
@@ -90,7 +104,7 @@ function MyTeamViewModel(options){
             drop: function (event, ui) {
                 var player = ko.dataFor(ui.draggable[0]);
                 me.parent.allPlayers.remove(player);
-                me.myTeam.push(player);
+                me.parent.myTeam.push(player);
                 $(".my-team-player").draggable({ revert: true });
             }
         });
@@ -101,7 +115,7 @@ function MyTeamViewModel(options){
             drop: function (event, ui) {
                 var player = ko.dataFor(ui.draggable[0]);
                 me.parent.allPlayers.push(player);
-                me.myTeam.remove(player);
+                me.parent.myTeam.remove(player);
                 $(".player").draggable({ revert: true });
             }
         });
@@ -112,4 +126,7 @@ function MyTeamViewModel(options){
     }
 }
 
-ko.applyBindings(new HockeyPoolToolViewModel());
+var viewModel = new HockeyPoolToolViewModel({ callback: function(){
+    ko.applyBindings(viewModel);
+    viewModel.afterBind();
+}});
