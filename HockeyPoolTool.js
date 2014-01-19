@@ -109,14 +109,16 @@ function MyTeamViewModel(options){
         $(".player, .my-team-player").draggable({ revert: true, zIndex: 10 });
 
         $(".my-team").droppable({
-            accept: ".player",
+            accept: ".player, .my-team-player",
             tolerance: "pointer",
+            greedy: true,
             drop: function (event, ui) {
-                var player = ko.dataFor(ui.draggable[0]);
-                me.parent.allPlayers.remove(player);
-                me.parent.myTeam.push(player);
-                $(".my-team-player").draggable({ revert: true });
-                event.stopPropagation();
+                if(!$(ui.draggable).hasClass("my-team-player")){
+                    var player = ko.dataFor(ui.draggable[0]);
+                    me.parent.allPlayers.remove(player);
+                    me.parent.myTeam.push(player);
+                    $(".my-team-player").draggable({ revert: true });
+                }
             }
         });
 
