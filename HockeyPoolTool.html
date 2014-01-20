@@ -49,17 +49,18 @@
                 <div class="col-md-3">
                     <h3>Players</h3>
                     <select class="form-control" data-bind="options: $parent.allTeams, value: selectedTeam, optionsText: 'name'"></select>
-                    <ul class="list-unstyled players-list" data-bind="foreach: $parent.allPlayers">
-                        <li class="player" data-bind="visible: Team == $parent.selectedTeam().code, text: Player" style="cursor:move; font-size: 22px; padding:5px 15px;"></li>
+                    <ul class="list-unstyled players-list" data-bind="foreach: { data: playersByTeam[selectedTeam().code], afterRender: setUpDraggable }">
+                        <li class="player" data-bind="text: Player" style="cursor:move; font-size: 22px; padding:5px 15px;"></li>
                     </ul>
                 </div>
                 <div class="col-md-9">
                     <h3>My Team</h3>
-                    <ul class="my-team list-inline well" data-bind="foreach: $parent.myTeam">
+                    <ul class="my-team list-inline well" data-bind="foreach: { data: $parent.myTeam, afterRender: setUpDraggable }">
                         <li class="my-team-player col-md-4" data-bind="text: Player" style="font-size: 28px; cursor: move;"></li>
                     </ul>
                 </div>
             </div>
+            <!--<pre data-bind="text: ko.toJSON(playersByTeam, null, 2)"></pre>-->
         </script>
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
         <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>

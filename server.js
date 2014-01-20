@@ -57,6 +57,13 @@ function getData(callback) {
     fs.readFile(dataFile, 'utf8', function(err, data){
 	    var nhlData = {};
     	nhlData.Stats = JSON.parse(data);
+
+        // Delete the nonbreaking space field, it's just an index on the original website
+        nhlData.Stats = nhlData.Stats.map(function(item, index, array){
+            delete item[String.fromCharCode(160)];
+            return item;
+        });
+        
 	    fs.readFile(teamsFile, 'utf8', function(err, data){
 	    	nhlData.Teams = JSON.parse(data);
 	        callback(nhlData);

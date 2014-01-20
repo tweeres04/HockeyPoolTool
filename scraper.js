@@ -30,12 +30,10 @@ function getTeamData(team, callback){
 				var column = $($(".data thead th")[j]).text().replace(/\n/g, "");
 				var value = $(cell).text().replace(/\n/g, "");
 
-				// Handle first column
-				if(column == " "){
-					column = "Rank";
+				// Don't scrape the rank column
+				if(column != String.fromCharCode(160)){
+					player[column] = value;
 				}
-
-				player[column] = value;
 			});
 			data.push(player);
 		});

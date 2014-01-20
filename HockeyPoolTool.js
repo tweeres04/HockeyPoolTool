@@ -90,24 +90,38 @@ function MyTeamViewModel(options){
     me.parent = options.parent;
     options = options || {};
 
+    me.playersByTeam = {};
     me.selectedTeam = ko.observable();
     me.selectedTeam.subscribe(function (newValue) {
         resizeMyTeamPanel();
     });
     me.selectedTeam(me.parent.allTeams()[0]);
 
-    me.afterRender = function(){
+    me.afterRender = function(elements, data){
         resizeMyTeamPanel();
-        setUpDragAndDrop();
+        setUpDroppables();
     };
+
+    me.setUpDraggable = function(elements, data){
+        $(elements).filter(".player, .my-team-player").draggable({ revert: true, zIndex: 10 });
+    }
+
+    getPlayersByTeam();
+
+    function getPlayersByTeam(){
+        me.parent.allPlayers().forEach(function(element, i, array){
+            if(!me.playersByTeam.hasOwnProperty(element.Team)){
+                me.playersByTeam[element.Team] = ko.observableArray();
+            }
+            me.playersByTeam[element.Team].push(element);
+        });
+    }
 
     function resizeMyTeamPanel() {
         $(".my-team").height($(".players-list").height());
     };
 
-    function setUpDragAndDrop() {
-        $(".player, .my-team-player").draggable({ revert: true, zIndex: 10 });
-
+    function setUpDroppables(){
         $(".my-team").droppable({
             accept: ".player, .my-team-player",
             tolerance: "pointer",
@@ -115,9 +129,8 @@ function MyTeamViewModel(options){
             drop: function (event, ui) {
                 if(!$(ui.draggable).hasClass("my-team-player")){
                     var player = ko.dataFor(ui.draggable[0]);
-                    me.parent.allPlayers.remove(player);
+                    me.playersByTeam[me.selectedTeam().code].remove(player);
                     me.parent.myTeam.push(player);
-                    $(".my-team-player").draggable({ revert: true });
                 }
             }
         });
@@ -127,14 +140,12 @@ function MyTeamViewModel(options){
             tolerance: "pointer",
             drop: function (event, ui) {
                 var player = ko.dataFor(ui.draggable[0]);
-                me.parent.allPlayers.push(player);
+                me.playersByTeam[player.Team].push(player);
+                me.playersByTeam[player.Team].sort(function(a, b){
+                    return a.Player < b.Player ? -1 : 1;
+                })
                 me.parent.myTeam.remove(player);
-                $(".player").draggable({ revert: true });
             }
-        });
-
-        $(".my-team").on("drop", function (event, ui) {
-            event.stopPropagation();
         });
     }
 }
