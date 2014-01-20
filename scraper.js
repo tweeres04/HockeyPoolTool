@@ -6,7 +6,9 @@ var fs = require('fs');
 var season = '20132014';
 var teams = ["ANA", "BOS", "BUF", "CGY", "CAR", "CHI", "COL", "CBJ", "DAL", "DET", "EDM", "FLA", "LAK", "MIN", "MTL", "NSH", "NJD", "NYI", "NYR", "OTT", "PHI", "PHX", "PIT", "SJS", "STL", "TBL", "TOR", "VAN", "WSH", "WPG", ];
 
-var data = [];
+var data = {};
+data.date = new Date();
+data.stats = [];
 
 var requests = [];
 
@@ -35,7 +37,7 @@ function getTeamData(team, callback){
 					player[column] = value;
 				}
 			});
-			data.push(player);
+			data.stats.push(player);
 		});
 		console.log("Stats downloaded for " + team + ".");
 		callback();
