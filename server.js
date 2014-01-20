@@ -76,4 +76,15 @@ function getTeam(callback) {
 }
 
 app.listen(3000);
-console.log("Server running");
+console.log("Server running. Press Q to exit.");
+
+var stdin = process.stdin;
+stdin.setRawMode( true );
+stdin.resume();
+stdin.setEncoding( 'utf8' );
+
+stdin.on( 'data', function( key ){
+    if(key == "q" || key === '\u0003'){
+        process.exit();
+    }
+});
