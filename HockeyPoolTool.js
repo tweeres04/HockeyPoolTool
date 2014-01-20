@@ -59,15 +59,7 @@ function HockeyPoolToolViewModel(options) {
                             console.log(response);
                         });
                     });
-
-                    for (var i in me.myTeam()) {
-                        for(var j in me.allPlayers()){
-                            if(me.myTeam()[i].Player == me.allPlayers()[j].Player){
-                                me.allPlayers.remove(me.allPlayers()[j]);
-                                break;
-                            }
-                        }
-                    }
+                    
                     if(callback){
                         callback();
                     }
